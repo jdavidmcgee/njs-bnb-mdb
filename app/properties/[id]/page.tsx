@@ -17,9 +17,9 @@ import ClientDynamicMap from '@/components/properties/ClientDynamicMap';
 export default async function PropertyDetailsPage({
 	params,
 }: {
-	params: { id: string };
+	params: Promise<{ id: string }>;
 }) {
-	const { id } = await params; // Await params before using it
+	const { id } = await Promise.resolve(params); // Await params before using it
 	const property = await fetchPropertyDetails(id);
 	//console.log(`🙏 ~ property:`, property);
 	if (!property) redirect('/');
@@ -75,5 +75,4 @@ export default async function PropertyDetailsPage({
 			</section>
 		</section>
 	);
-
 }
