@@ -8,7 +8,7 @@ export default async function HomePage({
 }: {
 	searchParams: { category?: string; search?: string };
 }) {
-	const { category, search } = await searchParams;
+	const { category, search } = searchParams;
 	// console.log(`🙏 ~ HomePage ~ search:`, search);
 	// console.log(`🙏 ~ HomePage ~ category:`, category);
 
