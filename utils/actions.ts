@@ -14,7 +14,7 @@ import { uploadImage } from './gcs';
 
 // Initialize Clerk client
 const clerkClient = createClerkClient({
-	secretKey: process.env.CLERK_SECRET_KEY,
+	secretKey: process.env.CLERK_SECRET_KEY as string,
 });
 
 // Helper functions... getAuthUser , renderError //
