@@ -14,7 +14,9 @@ export default async function HomePage({
 
 	return (
 		<section>
-			<CategoriesList category={category} search={search} />
+			<Suspense fallback={<LoadingCards />}>
+				<CategoriesList category={category} search={search} />
+			</Suspense>
 			<Suspense fallback={<LoadingCards />}>
 				<PropertiesContainer category={category} search={search} />
 			</Suspense>
