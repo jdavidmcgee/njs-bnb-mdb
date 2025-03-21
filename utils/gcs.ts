@@ -1,20 +1,37 @@
 // lib/gcs.ts
 import { Storage } from '@google-cloud/storage';
+import { getSecret } from '../lib/secretManager';
 
-const storage = new Storage({
-	projectId: process.env.GCLOUD_PROJECT_ID,
-	keyFilename: process.env.GCLOUD_KEYFILE_PATH, // Alternatively, set GOOGLE_APPLICATION_CREDENTIALS
-});
+async function initializeStorage() {
+	if (!process.env.GCLOUD_PROJECT_ID) {
+		throw new Error('Missing GCLOUD_PROJECT_ID environment variable');
+	}
+	if (!process.env.GCS_BUCKET_NAME) {
+		throw new Error('Missing GCS_BUCKET_NAME environment variable');
+	}
 
-const bucketName = process.env.GCS_BUCKET_NAME as string;
-const bucket = storage.bucket(bucketName);
+	// Retrieve the secret from Secret Manager.
+	// Assuming your secret's name is 'gcloud-keyfile-json'
+	const keyJson = await getSecret('gcloud-keyfile-json');
+
+	const storage = new Storage({
+		projectId: process.env.GCLOUD_PROJECT_ID,
+		credentials: JSON.parse(keyJson),
+	});
+
+	const bucketName = process.env.GCS_BUCKET_NAME;
+	const bucket = storage.bucket(bucketName);
+
+	return { storage, bucket };
+}
 
 /**
  * Uploads an image to Google Cloud Storage and returns its public URL.
  * @param image A File object (from a Next.js server action or API route)
  */
 export const uploadImage = async (image: File): Promise<string> => {
-	// Create a unique name for the image
+	const { bucket } = await initializeStorage();
+
 	const timestamp = Date.now();
 	const newName = `${timestamp}-${image.name}`;
 
@@ -27,10 +44,9 @@ export const uploadImage = async (image: File): Promise<string> => {
 	// Upload the file buffer to GCS
 	await fileUpload.save(fileBuffer, {
 		metadata: { contentType: image.type },
-		public: true, // Makes the file publicly accessible
-		resumable: false, // For smaller files, non-resumable is simpler
+		public: true,
+		resumable: false,
 	});
 
-	// Return the public URL of the uploaded image
-	return `https://storage.googleapis.com/${bucketName}/${newName}`;
+	return `https://storage.googleapis.com/${process.env.GCS_BUCKET_NAME}/${newName}`;
 };
