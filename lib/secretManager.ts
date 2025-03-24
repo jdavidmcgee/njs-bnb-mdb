@@ -10,6 +10,13 @@ if (!process.env.GCLOUD_PROJECT_ID) {
 	throw new Error('Missing GCLOUD_PROJECT_ID environment variable');
 }
 
+// Temporary debug logging to check environment variable
+const rawCreds = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON as string;
+console.log('DEBUG: GOOGLE_APPLICATION_CREDENTIALS_JSON exists:', !!rawCreds);
+if (rawCreds) {
+  console.log('DEBUG: First 20 characters:', rawCreds.substring(0, 20));
+}
+
 
 const credentialsJson = (
 	process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON as string
