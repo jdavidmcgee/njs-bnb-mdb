@@ -1,7 +1,11 @@
 // lib/secretManager.ts
 import { SecretManagerServiceClient } from '@google-cloud/secret-manager';
 
-const client = new SecretManagerServiceClient();
+const client = new SecretManagerServiceClient({
+	credentials: JSON.parse(
+		process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON as string
+	),
+});
 
 /**
  * Retrieves the latest version of a secret.
