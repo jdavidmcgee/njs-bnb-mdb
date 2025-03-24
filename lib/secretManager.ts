@@ -1,11 +1,23 @@
 // lib/secretManager.ts
 import { SecretManagerServiceClient } from '@google-cloud/secret-manager';
 
+if (!process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
+	throw new Error(
+		'Missing GOOGLE_APPLICATION_CREDENTIALS_JSON environment variable'
+	);
+}
+if (!process.env.GCLOUD_PROJECT_ID) {
+	throw new Error('Missing GCLOUD_PROJECT_ID environment variable');
+}
+
+
+const credentialsJson = (
+	process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON as string
+).trim();
 const client = new SecretManagerServiceClient({
-	credentials: JSON.parse(
-		process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON as string
-	),
+	credentials: JSON.parse(credentialsJson),
 });
+
 
 /**
  * Retrieves the latest version of a secret.
