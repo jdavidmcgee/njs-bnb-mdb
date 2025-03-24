@@ -10,21 +10,19 @@ if (!process.env.GCLOUD_PROJECT_ID) {
 	throw new Error('Missing GCLOUD_PROJECT_ID environment variable');
 }
 
-// Temporary debug logging to check environment variable
-const rawCreds = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON as string;
-console.log('DEBUG: GOOGLE_APPLICATION_CREDENTIALS_JSON exists:', !!rawCreds);
-if (rawCreds) {
-  console.log('DEBUG: First 20 characters:', rawCreds.substring(0, 20));
-}
-
-
 const credentialsJson = (
 	process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON as string
 ).trim();
+console.log(
+	'DEBUG: GOOGLE_APPLICATION_CREDENTIALS_JSON exists:',
+	!!credentialsJson
+);
+console.log('DEBUG: First 20 characters:', credentialsJson.substring(0, 20));
+
 const client = new SecretManagerServiceClient({
+	projectId: process.env.GCLOUD_PROJECT_ID, // Added explicit projectId
 	credentials: JSON.parse(credentialsJson),
 });
-
 
 /**
  * Retrieves the latest version of a secret.
@@ -33,15 +31,10 @@ const client = new SecretManagerServiceClient({
  */
 export async function getSecret(secretName: string): Promise<string> {
 	// Construct the resource name of the secret version.
-	// It will look like: projects/<PROJECT_ID>/secrets/<SECRET_NAME>/versions/latest
 	const name = `projects/${process.env.GCLOUD_PROJECT_ID}/secrets/${secretName}/versions/latest`;
-
 	const [version] = await client.accessSecretVersion({ name });
-
 	if (!version.payload || !version.payload.data) {
 		throw new Error('Secret payload is empty');
 	}
-
-	const payload = version.payload.data.toString();
-	return payload;
+	return version.payload.data.toString(); // Defaults to UTF-8
 }
